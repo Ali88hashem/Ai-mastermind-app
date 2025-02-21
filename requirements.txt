@@ -6,5 +6,4 @@ speechrecognition
 pyttsx3
 transformers
 beautifulsoup4
-PyPDF2
-torch
+pypdf2
