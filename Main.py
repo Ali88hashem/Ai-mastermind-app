@@ -1,3 +1,8 @@
+# Install dependencies for Colab
+!apt-get install -y python3-dev python3-pip
+!apt-get install -y tesseract-ocr
+!pip install pytesseract opencv-python pandas speechrecognition pyttsx3 transformers beautifulsoup4 pypdf2
+
 import os
 import json
 import requests
@@ -9,6 +14,22 @@ import pyttsx3
 from bs4 import BeautifulSoup
 from transformers import pipeline
 from PyPDF2 import PdfReader
+from google.colab import files
+import subprocess
+import pkg_resources
+import sys
+
+# Ensure Tesseract is correctly set up
+pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+
+def install_dependencies():
+    """Install missing dependencies for Colab."""
+    required = {"requests", "pytesseract", "opencv-python", "pandas",
+                "speechrecognition", "pyttsx3", "transformers", "beautifulsoup4", "pypdf2"}
+    installed = {pkg.key for pkg in pkg_resources.working_set}
+    missing = required - installed
+    if missing:
+        subprocess.check_call([sys.executable, "-m", "pip", "install"] + list(missing))
 
 class AIMastermind:
     def __init__(self):
@@ -24,13 +45,12 @@ class AIMastermind:
         self.tts_engine.say(text)
         self.tts_engine.runAndWait()
 
-    def speech_to_text(self):
-        """Convert speech to text."""
-        with sr.Microphone() as source:
-            print("Listening...")
-            audio = self.recognizer.listen(source)
+    def speech_to_text(self, audio_file_path):
+        """Convert speech to text from an audio file."""
+        with sr.AudioFile(audio_file_path) as source:
+            audio_data = self.recognizer.record(source)
             try:
-                return self.recognizer.recognize_google(audio)
+                return self.recognizer.recognize_google(audio_data)
             except sr.UnknownValueError:
                 return "Could not understand audio."
             except sr.RequestError:
@@ -108,16 +128,8 @@ class AIMastermind:
         except Exception as e:
             return f"Restore error: {e}"
 
-    def install_dependencies(self):
-        """Install required dependencies."""
-        dependencies = [
-            "requests", "pytesseract", "opencv-python", "pandas",
-            "speechrecognition", "pyttsx3", "transformers", "beautifulsoup4", "pypdf2"
-        ]
-        for package in dependencies:
-            os.system(f"pip install {package}")
-
 if __name__ == "__main__":
+    install_dependencies()
     ai = AIMastermind()
     ai.text_to_speech("Hello, I am AI Mastermind")
     print("Summarized Text:", ai.summarize_text(
