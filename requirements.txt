@@ -1,0 +1,10 @@
+requests
+pytesseract
+opencv-python
+pandas
+speechrecognition
+pyttsx3
+transformers
+beautifulsoup4
+PyPDF2
+torch
